@@ -1,0 +1,44 @@
+{
+  "projectId": "15d12f26-33f5-47ae-b6a3-ad330e7e36bd",
+  "type": "frontend",
+  "name": "Admin Login Test",
+  "description": "Test admin login functionality with valid credentials",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "step": 1,
+      "description": "Navigate to login page",
+      "action": "Navigate to login page",
+      "expectation": "Login page loads with email and password fields"
+    },
+    {
+      "type": "action",
+      "step": 2,
+      "description": "Fill login form",
+      "action": "Fill login form with email: febroyanustambling54@gmail.com and password: password",
+      "expectation": "Form fields are filled correctly"
+    },
+    {
+      "type": "action",
+      "step": 3,
+      "description": "Submit login form",
+      "action": "Click the login submit button",
+      "expectation": "Form is submitted successfully"
+    },
+    {
+      "type": "assertion",
+      "step": 4,
+      "description": "Verify login success",
+      "action": "Check if redirected to admin dashboard",
+      "expectation": "User is redirected to /admin or dashboard page after successful login"
+    },
+    {
+      "type": "assertion",
+      "step": 5,
+      "description": "Verify admin menu visible",
+      "action": "Check if admin navigation or dashboard elements are visible",
+      "expectation": "Admin menu, sidebar, or dashboard widgets are visible after login"
+    }
+  ]
+}

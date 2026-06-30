@@ -1,0 +1,24 @@
+--- tests/Feature/AdminPortfolioSyncTest.php
++++ tests/Feature/AdminPortfolioSyncTest.php
+@@ -226,16 +226,11 @@
+             'label' => 'GitHub',
+         ]);
+ 
+-        $response = $this->actingAs($this->user)->patch('/admin/social-links', [
+-            'links' => [
+-                [
+-                    'platform' => 'github',
+-                    'label' => 'GitHub',
+-                    'url' => 'https://github.com/new-username',
+-                    'display_order' => 1,
+-                    'is_active' => true,
+-                ],
+-            ],
++        $response = $this->actingAs($this->user)->put("/admin/social-links/{$link->id}", [
++            'platform' => 'github',
++            'label' => 'GitHub',
++            'url' => 'https://github.com/new-username',
++            'is_active' => true,
+         ]);
+ 
+         $response->assertSessionHasNoErrors();

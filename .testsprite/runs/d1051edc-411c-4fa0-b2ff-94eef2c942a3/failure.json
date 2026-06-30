@@ -1,0 +1,5 @@
+{
+  "rootCauseHypothesis": "TEST BLOCKED\n\nThe test could not be run — the admin login failed because the provided credentials were rejected.\n\nObservations:\n- The login form displayed the error 'These credentials do not match our records.'\n- The page remained on the login screen and did not navigate to an admin dashboard or Kanban board\n\nNo further steps (navigating to Time Management, verifying Kanban, or performing drag-and-drop) could be executed because admin access was not granted.",
+  "recommendedFixTarget": null,
+  "evidence": []
+}

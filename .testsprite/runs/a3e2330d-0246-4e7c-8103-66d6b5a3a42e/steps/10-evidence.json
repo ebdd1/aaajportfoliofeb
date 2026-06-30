@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 10,
+    "summary": "Step 10 'Expected the 'Masuk' button to be hidden after successful login.' failed. Error: TEST FAILURE\n\nAdmin login did not succeed — submitting the provided email and password did not sign in to the admin area.\n\nObservations:\n- After two login attempts the page remained on the login screen showing the 'Alamat Email' and 'Kata Sandi' form.\n- The email field contains 'febryanustambling54@gmail.com' and the password field appears filled, but no admin dashboard or admin menu is visible.\n- No redirect or success confirmation was observed; no visible error message was shown on the page.",
+    "path": "steps/10-snapshot.html"
+  }
+]

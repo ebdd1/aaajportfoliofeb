@@ -1,0 +1,20 @@
+{
+  "testId": "ce228014-5fea-41dc-8ccb-6ee6b205f4f0",
+  "status": "blocked",
+  "startedAt": "2026-06-28T13:39:57.321Z",
+  "finishedAt": "2026-06-28T13:44:24.138Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/c418a488-10d1-705d-9b02-ebd73c843e17/178265426351534//tmp/bfb4f957-4ff7-4bf2-a437-0056e8da43cc/result.webm",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_9fc4f44b1f264e44",
+  "runIdIfAvailable": "37656c73-6852-44da-8e46-b01e2848b562",
+  "codeVersion": "v1",
+  "targetUrl": "https://greyhound-quicken-schedule.ngrok-free.dev",
+  "targetUrlSource": "run",
+  "failedStepIndex": 13,
+  "failureKind": null,
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  }
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 8,
+    "summary": "Step 8 'Expected hero name 'F Febryanus' to be visible.' failed. Error: TEST BLOCKED\n\nThe responsive (mobile) layout could not be verified because viewport resizing or device emulation is not available in this test environment.\n\nObservations:\n- The homepage loads and displays the hero section with the name 'Febryanus' and subtitle visible.\n- The skills grid and navigation menu (links: Tentang, Keahlian, Pengalaman, Proyek, Kontak) are present in the header.\n- The contact form is available via the 'Hubungi' modal and contains the fields 'Nama', 'Email', 'Pesan' and the 'Kirim Pesan' submit button.",
+    "path": "steps/08-snapshot.html"
+  }
+]

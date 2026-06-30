@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 8,
+    "summary": "Step 8 'Click the 'Masuk' button to submit the login form again and verify whether the page redirects to the admin dashboard or shows an admin menu' passed.",
+    "path": "steps/08-snapshot.html"
+  }
+]

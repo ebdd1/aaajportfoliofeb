@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_9fc4f44b1f264e44",
+  "testId": "ce228014-5fea-41dc-8ccb-6ee6b205f4f0",
+  "projectId": "15d12f26-33f5-47ae-b6a3-ad330e7e36bd",
+  "codeVersion": "v1",
+  "runIdIfAvailable": "37656c73-6852-44da-8e46-b01e2848b562",
+  "targetUrl": "https://greyhound-quicken-schedule.ngrok-free.dev",
+  "failedStepIndex": 13,
+  "failureKind": null,
+  "capturedAt": "2026-06-28T13:44:24.138Z",
+  "fetchedAt": "2026-06-28T13:44:55.321Z"
+}

@@ -1,0 +1,51 @@
+{
+  "projectId": "15d12f26-33f5-47ae-b6a3-ad330e7e36bd",
+  "type": "frontend",
+  "name": "Portfolio Homepage Frontend Test",
+  "description": "Test portfolio homepage loads correctly, displays hero section, skills, and navigation",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "step": 1,
+      "description": "Navigate to homepage",
+      "action": "Navigate to homepage",
+      "expectation": "Page loads without errors, displays portfolio name 'Febryanus Tambing'"
+    },
+    {
+      "type": "assertion",
+      "step": 2,
+      "description": "Verify hero section displays",
+      "action": "Verify hero section",
+      "expectation": "Hero section displays with name, tagline, and statistics"
+    },
+    {
+      "type": "assertion",
+      "step": 3,
+      "description": "Check skills grid loads",
+      "action": "Check skills grid",
+      "expectation": "Skills section displays with categorized skills"
+    },
+    {
+      "type": "assertion",
+      "step": 4,
+      "description": "Verify navigation menu",
+      "action": "Verify navigation menu",
+      "expectation": "Navigation menu is visible with links"
+    },
+    {
+      "type": "assertion",
+      "step": 5,
+      "description": "Check responsive design",
+      "action": "Check responsive design",
+      "expectation": "Page renders correctly on desktop viewport"
+    },
+    {
+      "type": "assertion",
+      "step": 6,
+      "description": "Verify contact form exists",
+      "action": "Verify contact form",
+      "expectation": "Contact form is present with name, email, and message fields"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+--- tests/Feature/AdminPortfolioSyncTest.php
++++ tests/Feature/AdminPortfolioSyncTest.php
+@@ -188,7 +188,8 @@
+         $response = $this->actingAs($this->user)->post('/admin/certificates', [
+             'title' => 'AWS Certificate',
+             'issuer' => 'Amazon',
+-            'issue_date' => '2024-01-01',
++            'issued_date' => '2024-01-01',
++            'file' => \Illuminate\Http\Testing\File::create('certificate.pdf', 100),
+             'is_active' => true,
+         ]);
+ 

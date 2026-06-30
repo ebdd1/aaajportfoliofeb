@@ -1,0 +1,51 @@
+{
+  "projectId": "15d12f26-33f5-47ae-b6a3-ad330e7e36bd",
+  "type": "frontend",
+  "name": "Admin Tasks Drag & Drop Test",
+  "description": "Test login admin dan drag drop task dari In Progress ke Done",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "step": 1,
+      "description": "Navigate ke halaman login admin",
+      "action": "Navigate to https://greyhound-quicken-schedule.ngrok-free.dev/login",
+      "expectation": "Halaman login tampil dengan form email dan password"
+    },
+    {
+      "type": "action",
+      "step": 2,
+      "description": "Login dengan kredensial admin",
+      "action": "Fill login form with email: febryanustambling54@gmail.com and password: admin123, lalu klik tombol login",
+      "expectation": "Berhasil login dan redirect ke dashboard admin"
+    },
+    {
+      "type": "action",
+      "step": 3,
+      "description": "Navigate ke halaman Manajemen Waktu",
+      "action": "Navigate to /admin/tasks atau klik menu Manajemen Waktu",
+      "expectation": "Halaman task management tampil dengan kanban board 3 kolom"
+    },
+    {
+      "type": "assertion",
+      "step": 4,
+      "description": "Verifikasi kanban board tampil",
+      "action": "Verifikasi ada 3 kolom: To Do, In Progress, Done",
+      "expectation": "Kanban board dengan 3 kolom terlihat"
+    },
+    {
+      "type": "action",
+      "step": 5,
+      "description": "Drag task dari In Progress ke Done",
+      "action": "Cari task yang ada di kolom In Progress, drag ke kolom Done",
+      "expectation": "Task berhasil dipindahkan ke kolom Done"
+    },
+    {
+      "type": "assertion",
+      "step": 6,
+      "description": "Verifikasi task pindah ke Done",
+      "action": "Verifikasi task sekarang ada di kolom Done",
+      "expectation": "Task tampil di kolom Done"
+    }
+  ]
+}

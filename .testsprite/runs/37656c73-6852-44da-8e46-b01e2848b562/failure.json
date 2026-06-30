@@ -1,0 +1,5 @@
+{
+  "rootCauseHypothesis": "TEST BLOCKED\n\nThe test could not be run — the admin sign-in failed and the admin area (required for the Kanban/drag-drop) cannot be reached without valid credentials.\n\nObservations:\n- The login form shows the error message: \"These credentials do not match our records.\" after repeated sign-in attempts.\n- Three login attempts were made using the provided email; the entered passwords returned the same credentials error.\n- The Manajemen Waktu / Kanban board could not be accessed because authentication did not succeed.",
+  "recommendedFixTarget": null,
+  "evidence": []
+}
