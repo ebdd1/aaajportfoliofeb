@@ -180,7 +180,8 @@
       "Bash(railway redeploy *)",
       "Bash(npm uninstall *)",
       "Bash(npm info *)",
-      "Bash(railway variable *)"
+      "Bash(railway variable *)",
+      "Bash(railway help *)"
     ]
   }
 }
