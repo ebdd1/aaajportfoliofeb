@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('quoted_price', 15, 2)->nullable();
             $table->decimal('agreed_price', 15, 2)->nullable();
             $table->date('due_date')->nullable();
-            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
+            $table->foreignId('invoice_id')->nullable();
             $table->timestamps();
 
             $table->index(['product_id', 'status']);
