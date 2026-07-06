@@ -179,7 +179,8 @@
       "Bash(git push *)",
       "Bash(railway redeploy *)",
       "Bash(npm uninstall *)",
-      "Bash(npm info *)"
+      "Bash(npm info *)",
+      "Bash(railway variable *)"
     ]
   }
 }
