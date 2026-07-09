@@ -53,6 +53,12 @@ class SiteSetting extends Model
         'pakasir_webhook_secret',
     ];
 
+    protected static function booted(): void
+    {
+        static::updated(fn () => static::clearCache());
+        static::created(fn () => static::clearCache());
+    }
+
     public static function getSingleton(): self
     {
         $data = Cache::remember('site_setting_singleton', 3600, function () {

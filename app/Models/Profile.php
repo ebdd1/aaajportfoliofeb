@@ -20,6 +20,12 @@ class Profile extends Model
         'meta_description',
     ];
 
+    protected static function booted(): void
+    {
+        static::updated(fn () => static::clearCache());
+        static::created(fn () => static::clearCache());
+    }
+
     public static function getSingleton(): self
     {
         $data = Cache::remember('profile_singleton', 3600, function () {
