@@ -16,7 +16,7 @@ class CheckoutSummaryController extends Controller
     {
         $profile = Profile::getSingleton();
         $socialLinks = SocialLink::where('is_active', true)
-            ->orderBy('order')
+            ->orderBy('display_order')
             ->get();
 
         return Inertia::render('Public/Checkout/Summary', [
