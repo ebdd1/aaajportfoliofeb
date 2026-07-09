@@ -34,9 +34,9 @@ class DashboardController extends Controller
         $revenueThisMonth = 0;
 
         try {
-            // Message stats - single query
+            // Message stats - single query (use false for PostgreSQL boolean compatibility)
             $messageStats = DB::table('messages')
-                ->selectRaw('COUNT(*) as total_messages, SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread_messages')
+                ->selectRaw('COUNT(*) as total_messages, SUM(CASE WHEN is_read = false THEN 1 ELSE 0 END) as unread_messages')
                 ->first() ?? $messageStats;
         } catch (Throwable $e) {
             Log::warning('Dashboard: failed to fetch message stats', ['error' => $e->getMessage()]);
