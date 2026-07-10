@@ -8,6 +8,10 @@ defineOptions({ layout: AdminLayout });
 const props = defineProps({
   products: Object,
   filters: Object,
+  categories: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const getStatusColor = (status) => {
@@ -62,7 +66,7 @@ const formatRupiah = (amount) => {
 
       <!-- Filters -->
       <div class="bg-paper border border-oat-dark rounded-xl p-4 mb-6">
-        <form @submit.prevent="router.get(route('admin.products.catalog.index'), filters)" class="flex gap-4">
+        <form @submit.prevent="router.get(route('admin.products.catalog.index'), filters)" class="flex gap-4 flex-wrap">
           <select v-model="filters.status" class="px-3 py-2 border border-oat rounded-lg">
             <option value="">Semua Status</option>
             <option value="idea">Ide</option>
@@ -78,16 +82,23 @@ const formatRupiah = (amount) => {
             <option value="saas">SaaS</option>
             <option value="physical">Fisik</option>
           </select>
+          <select v-model="filters.category" class="px-3 py-2 border border-oat rounded-lg">
+            <option value="">Semua Kategori</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+          </select>
           <button type="submit" class="px-4 py-2 bg-terracotta text-white rounded-lg">Filter</button>
         </form>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="product in products.data" :key="product.id" class="bg-paper border border-oat-dark rounded-2xl p-6">
-          <div class="flex items-start justify-between mb-4">
+          <div class="flex items-start justify-between mb-2">
             <div>
               <h3 class="font-fraunces font-semibold text-ink text-lg">{{ product.name }}</h3>
-              <span class="text-sm text-taupe">{{ getTypeLabel(product.type) }}</span>
+              <div class="flex items-center gap-2 text-sm text-taupe">
+                <span>{{ getTypeLabel(product.type) }}</span>
+                <span v-if="product.category">• {{ product.category.name }}</span>
+              </div>
             </div>
             <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getStatusColor(product.status)">
               {{ getStatusLabel(product.status) }}

@@ -1,11 +1,20 @@
 <script setup>
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { computed } from 'vue';
 
 defineOptions({ layout: AdminLayout });
 
+const props = defineProps({
+  categories: {
+    type: Array,
+    default: () => [],
+  },
+});
+
 const form = useForm({
   name: '',
+  category_id: '',
   type: 'service',
   status: 'idea',
   short_description: '',
@@ -43,16 +52,23 @@ const submit = () => {
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-ink mb-1">Tipe</label>
-              <select v-model="form.type" class="w-full px-4 py-2 border border-oat rounded-lg">
-                <option value="service">Jasa</option>
-                <option value="digital_product">Produk Digital</option>
-                <option value="saas">SaaS</option>
-                <option value="physical">Fisik</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-ink mb-1">Status</label>
+            <label class="block text-sm font-medium text-ink mb-1">Tipe</label>
+            <select v-model="form.type" class="w-full px-4 py-2 border border-oat rounded-lg">
+              <option value="service">Jasa</option>
+              <option value="digital_product">Produk Digital</option>
+              <option value="saas">SaaS</option>
+              <option value="physical">Fisik</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-ink mb-1">Kategori</label>
+            <select v-model="form.category_id" class="w-full px-4 py-2 border border-oat rounded-lg">
+              <option value="">-- Pilih Kategori --</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-ink mb-1">Status</label>
               <select v-model="form.status" class="w-full px-4 py-2 border border-oat rounded-lg">
                 <option value="idea">Ide</option>
                 <option value="building">Dibangun</option>

@@ -6,10 +6,15 @@ defineOptions({ layout: AdminLayout });
 
 const props = defineProps({
   product: Object,
+  categories: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const form = useForm({
   name: props.product.name,
+  category_id: props.product.category_id || '',
   type: props.product.type,
   status: props.product.status,
   short_description: props.product.short_description || '',
@@ -64,6 +69,16 @@ const deleteProduct = () => {
                 <option value="physical">Fisik</option>
               </select>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-1">Kategori</label>
+              <select v-model="form.category_id" class="w-full px-4 py-2 border border-oat rounded-lg">
+                <option value="">-- Pilih Kategori --</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-ink mb-1">Status</label>
               <select v-model="form.status" class="w-full px-4 py-2 border border-oat rounded-lg">

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,10 @@ class ProductController extends Controller
             $query->where('type', $request->type);
         }
 
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%");
         }
@@ -39,13 +44,16 @@ class ProductController extends Controller
 
         return inertia('Admin/Products/Catalog/Index', [
             'products' => $products,
-            'filters' => $request->only(['status', 'type', 'search']),
+            'filters' => $request->only(['status', 'type', 'category', 'search']),
+            'categories' => Category::orderBy('name')->get(),
         ]);
     }
 
     public function create(): Response
     {
-        return inertia('Admin/Products/Catalog/Create');
+        return inertia('Admin/Products/Catalog/Create', [
+            'categories' => Category::orderBy('name')->get(),
+        ]);
     }
 
     public function store(StoreProductRequest $request): RedirectResponse
@@ -74,7 +82,8 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return inertia('Admin/Products/Catalog/Edit', [
-            'product' => $product,
+            'product' => $product->load('category'),
+            'categories' => Category::orderBy('name')->get(),
         ]);
     }
 

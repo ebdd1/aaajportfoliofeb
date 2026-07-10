@@ -6,6 +6,7 @@ namespace App\Models\Product;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -18,6 +19,7 @@ final class Product extends Model
     protected $fillable = [
         'name',
         'slug',
+        'category_id',
         'type',
         'status',
         'short_description',
@@ -42,6 +44,11 @@ final class Product extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(ProductOrder::class, 'product_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Category::class);
     }
 
     public function roadmapItems(): HasMany
