@@ -44,6 +44,12 @@ final class SiteSettingController extends Controller
                 'hero_stat_card_border' => $settings->hero_stat_card_border ?? false,
                 'hero_stat_card_border_color' => $settings->hero_stat_card_border_color ?? '#E8E2D3',
                 'hero_stat_card_backdrop_blur' => $settings->hero_stat_card_backdrop_blur ?? false,
+                // SEO fields
+                'seo_meta_title' => $settings->seo_meta_title,
+                'seo_meta_description' => $settings->seo_meta_description,
+                'seo_canonical_url' => $settings->seo_canonical_url,
+                'seo_robots' => $settings->seo_robots ?? 'index, follow',
+                'seo_sitemap_include' => $settings->seo_sitemap_include ?? true,
                 // Payment settings - don't expose secrets
                 'pakasir_project' => $settings->pakasir_project,
                 'has_api_key' => !empty($settings->pakasir_api_key),
@@ -208,5 +214,23 @@ final class SiteSettingController extends Controller
         return redirect()
             ->route('admin.settings.web')
             ->with('success', 'Background hero berhasil dihapus.');
+    }
+
+    public function updateSeo(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'seo_meta_title' => ['nullable', 'string', 'max:255'],
+            'seo_meta_description' => ['nullable', 'string', 'max:500'],
+            'seo_canonical_url' => ['nullable', 'string', 'url', 'max:255'],
+            'seo_robots' => ['nullable', 'string', 'max:100'],
+            'seo_sitemap_include' => ['boolean'],
+            'google_analytics_id' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        SiteSetting::getSingleton()->update($validated);
+
+        return redirect()
+            ->route('admin.settings.web')
+            ->with('success', 'Pengaturan SEO berhasil disimpan.');
     }
 }

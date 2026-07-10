@@ -42,6 +42,15 @@ const showWebhookSecret = ref(false);
 const faviconForm = useForm({ favicon: null });
 const ogForm = useForm({ og_image: null });
 
+const seoForm = useForm({
+    seo_meta_title: props.settings?.seo_meta_title ?? '',
+    seo_meta_description: props.settings?.seo_meta_description ?? '',
+    seo_canonical_url: props.settings?.seo_canonical_url ?? '',
+    seo_robots: props.settings?.seo_robots ?? 'index, follow',
+    seo_sitemap_include: props.settings?.seo_sitemap_include ?? true,
+    google_analytics_id: props.settings?.google_analytics_id ?? '',
+});
+
 const heroForm = useForm({
     hero_background: null,
     hero_opacity: props.settings?.hero_opacity ?? 30,
@@ -98,6 +107,10 @@ const submitFavicon = () => {
 
 const submitOgImage = () => {
     ogForm.post(route('admin.settings.web.og-image'), { onSuccess: () => ogForm.reset() });
+};
+
+const submitSeo = () => {
+    seoForm.patch(route('admin.settings.web.seo'), { preserveScroll: true });
 };
 
 const submitHero = () => {
@@ -385,18 +398,92 @@ const deleteHeroBackground = async () => {
                     </div>
 
                     <!-- Tab: SEO -->
-                    <div v-show="activeTab === 'seo'" class="space-y-5">
-                        <h2 class="font-medium text-ink">SEO & Analytics</h2>
+                    <div v-show="activeTab === 'seo'" class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium text-ink mb-1">Google Analytics ID</label>
-                            <input v-model="form.google_analytics_id" type="text"
-                                class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-cream focus:outline-none focus:border-terracotta transition-colors text-sm font-mono"
-                                placeholder="G-XXXXXXXXXX" />
+                            <h2 class="font-medium text-ink mb-1">SEO & Metadata</h2>
+                            <p class="text-xs text-taupe">Optimasi untuk mesin pencari dan media sosial.</p>
                         </div>
+
+                        <!-- Meta Tags -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">Meta Tags</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Meta Title</label>
+                                <input v-model="seoForm.seo_meta_title" type="text"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm"
+                                    placeholder="Portfolio Febryanus - Full Stack Developer" />
+                                <p class="text-[10px] text-taupe mt-1">Idealnya 50-60 karakter. {{ seoForm.seo_meta_title?.length || 0 }} karakter</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Meta Description</label>
+                                <textarea v-model="seoForm.seo_meta_description" rows="3"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm resize-none"
+                                    placeholder="Deskripsi singkat tentang portfolio kamu untuk ditampilkan di hasil pencarian..."></textarea>
+                                <p class="text-[10px] text-taupe mt-1">Idealnya 150-160 karakter. {{ seoForm.seo_meta_description?.length || 0 }} karakter</p>
+                            </div>
+                        </div>
+
+                        <!-- Robots & Sitemap -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">Indexing & Sitemap</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Robots Directive</label>
+                                <select v-model="seoForm.seo_robots" class="w-full text-sm px-3 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors">
+                                    <option value="index, follow">Index, Follow (Default)</option>
+                                    <option value="index, nofollow">Index, NoFollow</option>
+                                    <option value="noindex, follow">NoIndex, Follow</option>
+                                    <option value="noindex, nofollow">NoIndex, NoFollow</option>
+                                </select>
+                                <p class="text-[10px] text-taupe mt-1">Instruksi untuk robot mesin pencari.</p>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-paper border border-oat-dark rounded-xl">
+                                <div>
+                                    <p class="text-sm font-medium text-ink">Include in Sitemap</p>
+                                    <p class="text-[10px] text-taupe mt-0.5">Tampilkan halaman di XML sitemap.</p>
+                                </div>
+                                <button type="button" @click="seoForm.seo_sitemap_include = !seoForm.seo_sitemap_include"
+                                    :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200',
+                                        seoForm.seo_sitemap_include ? 'bg-terracotta' : 'bg-oat-dark']">
+                                    <span :class="['inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200',
+                                        seoForm.seo_sitemap_include ? 'translate-x-6' : 'translate-x-1']" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Canonical URL -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">Canonical URL</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Canonical URL</label>
+                                <input v-model="seoForm.seo_canonical_url" type="url"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm font-mono"
+                                    placeholder="https://febryanmyid.up.railway.app" />
+                                <p class="text-[10px] text-taupe mt-1">URL utama untuk menghindari konten duplikat.</p>
+                            </div>
+                        </div>
+
+                        <!-- Google Analytics -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">Analytics</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Google Analytics ID</label>
+                                <input v-model="seoForm.google_analytics_id" type="text"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm font-mono"
+                                    placeholder="G-XXXXXXXXXX" />
+                                <p class="text-[10px] text-taupe mt-1">Tracking ID untuk Google Analytics 4.</p>
+                            </div>
+                        </div>
+
                         <div class="flex justify-end pt-2">
-                            <button @click="submit" :disabled="form.processing"
+                            <button @click="submitSeo" :disabled="seoForm.processing"
                                 class="px-6 py-2.5 bg-terracotta text-cream rounded-xl font-medium text-sm hover:bg-terracotta/90 transition-colors disabled:opacity-50">
-                                Simpan
+                                {{ seoForm.processing ? 'Menyimpan...' : 'Simpan SEO' }}
                             </button>
                         </div>
                     </div>

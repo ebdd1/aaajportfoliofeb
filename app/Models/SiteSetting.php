@@ -13,6 +13,14 @@ class SiteSetting extends Model
         'site_name',
         'site_description',
         'google_analytics_id',
+
+        // SEO Fields
+        'seo_meta_title',
+        'seo_meta_description',
+        'seo_canonical_url',
+        'seo_robots',
+        'seo_sitemap_include',
+
         'favicon_path',
         'og_image_path',
         'hero_background_path',

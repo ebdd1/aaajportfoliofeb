@@ -161,6 +161,7 @@ Route::prefix('admin')
         Route::post('/settings/web/og-image', [SiteSettingController::class, 'updateOgImage'])->name('settings.web.og-image');
         Route::post('/settings/web/hero', [SiteSettingController::class, 'updateHero'])->name('settings.web.hero');
         Route::delete('/settings/web/hero', [SiteSettingController::class, 'deleteHeroBackground'])->name('settings.web.hero.destroy');
+        Route::patch('/settings/web/seo', [SiteSettingController::class, 'updateSeo'])->name('settings.web.seo');
 
         // Tasks (Time Management)
         Route::resource('tasks', TaskController::class)->except(['create', 'show', 'edit']);
