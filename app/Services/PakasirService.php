@@ -7,16 +7,16 @@ use Illuminate\Support\Facades\Log;
 
 class PakasirService
 {
-    protected string $project;
-    protected string $apiKey;
+    protected string $project = '';
+    protected string $apiKey = '';
     protected string $baseUrl = 'https://app.pakasir.com/api';
     protected int $timeout = 10;
 
     public function __construct()
     {
-        $this->project = config('services.pakasir.project', env('PAKASIR_PROJECT', ''));
-        $this->apiKey = config('services.pakasir.api_key', env('PAKASIR_API_KEY', ''));
-        $this->timeout = (int) config('services.pakasir.timeout', 10);
+        $this->project = config('services.pakasir.project') ?? env('PAKASIR_PROJECT', '');
+        $this->apiKey = config('services.pakasir.api_key') ?? env('PAKASIR_API_KEY', '');
+        $this->timeout = (int) (config('services.pakasir.timeout') ?? 10);
     }
 
     public function createTransaction(string $method, string $orderId, int $amount): array
