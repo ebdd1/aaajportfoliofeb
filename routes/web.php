@@ -250,6 +250,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:3,1')  // 3 attempts per minute to prevent order spam
         ->name('checkout.initiate');
     Route::get('/payment/{order}', [CheckoutController::class, 'payment'])->name('payment.show');
+    Route::post('/payment/{order}/retry', [CheckoutController::class, 'retryPayment'])
+        ->middleware('throttle:5,1')  // 5 retries per minute
+        ->name('payment.retry');
 
     // User Dashboard - Simple URLs without UUID
     Route::get('/dashboard/user/home', [\App\Http\Controllers\Public\UserDashboardController::class, 'show'])->name('user.dashboard.home');

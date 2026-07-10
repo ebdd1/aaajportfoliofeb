@@ -82,6 +82,17 @@ const refreshPage = () => {
     isExpired.value = false;
 };
 
+const retryPayment = () => {
+    router.post(`/payment/${props.order.order_id}/retry`, {}, {
+        onSuccess: () => {
+            // Will redirect to payment page with new payment details
+        },
+        onError: (errors) => {
+            alert(errors.error || 'Gagal retry pembayaran');
+        }
+    });
+};
+
 watch(() => props.order?.status, (newStatus) => {
     if (newStatus === 'paid') {
         showSuccessModal.value = true;
@@ -147,12 +158,20 @@ onUnmounted(() => {
                 </div>
                 <div v-else class="text-red-600">
                     <p class="text-xl font-semibold mb-2">Pembayaran Kadaluarsa</p>
-                    <button
-                        @click="refreshPage"
-                        class="px-4 py-2 bg-terracotta text-cream rounded-lg hover:bg-terracotta-dark transition-colors"
-                    >
-                        Refresh Halaman
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                        <button
+                            @click="retryPayment"
+                            class="px-4 py-2 bg-terracotta text-cream rounded-lg hover:bg-terracotta-dark transition-colors"
+                        >
+                            Coba Bayar Lagi
+                        </button>
+                        <button
+                            @click="refreshPage"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        >
+                            Refresh Halaman
+                        </button>
+                    </div>
                 </div>
             </div>
 

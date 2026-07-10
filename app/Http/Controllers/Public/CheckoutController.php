@@ -104,6 +104,46 @@ class CheckoutController extends Controller
         ], $this->getSharedData()));
     }
 
+    public function retryPayment(Order $order): RedirectResponse
+    {
+        // Secure: Require authentication
+        if (!auth()->check() || $order->user_id !== auth()->id()) {
+            return redirect()->route('login');
+        }
+
+        // Only allow retry for pending orders
+        if (!$order->isPending()) {
+            return redirect()->route('orders.show', $order->order_id)
+                ->with('error', 'Tidak dapat retry untuk order yang sudah ' . $order->getStatusLabel());
+        }
+
+        // Check if expired
+        if ($order->expired_at && $order->expired_at->isPast()) {
+            return redirect()->route('orders.show', $order->order_id)
+                ->with('error', 'Order sudah kadaluarsa. Silakan buat order baru.');
+        }
+
+        // Create new transaction with Pakasir
+        $payment = $this->pakasir->createTransaction(
+            $order->payment_method,
+            $order->order_id,
+            $order->total_amount
+        );
+
+        if (empty($payment)) {
+            return back()->with('error', 'Gagal membuat transaksi. Coba lagi.');
+        }
+
+        // Update order with new payment details
+        $order->update([
+            'payment_token' => $payment['payment_number'] ?? null,
+            'payment_number' => $payment['payment_number'] ?? null,
+            'expired_at' => isset($payment['expired_at']) ? now()->parse($payment['expired_at']) : now()->addHours(24),
+        ]);
+
+        return redirect()->route('payment.show', $order);
+    }
+
     public function payment(Order $order)
     {
         // Secure: Require authentication
