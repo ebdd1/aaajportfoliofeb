@@ -69,9 +69,15 @@ class SiteSetting extends Model
 
     public static function getSingleton(): self
     {
-        $data = Cache::remember('site_setting_singleton', 3600, function () {
+        return Cache::remember('site_setting_singleton', 3600, function () {
             $setting = self::first();
-            return $setting ? $setting->toArray() : [
+
+            if ($setting) {
+                return $setting;
+            }
+
+            // Create default settings if none exist
+            return self::create([
                 'site_name' => 'Portfolio',
                 'site_description' => '',
                 'maintenance_mode' => false,
@@ -91,10 +97,8 @@ class SiteSetting extends Model
                 'hero_stat_card_border' => false,
                 'hero_stat_card_border_color' => '#E8E2D3',
                 'hero_stat_card_backdrop_blur' => false,
-            ];
+            ]);
         });
-
-        return (new self)->forceFill($data);
     }
 
     public static function clearCache(): void

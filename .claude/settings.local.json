@@ -233,7 +233,8 @@
       "Bash(cp -r /home/ebry/.claude/skills/gobuild/* /root/.claude/skills/)",
       "Bash(cp -r /home/ebry/.claude/skills/gowork/* /root/.claude/skills/)",
       "Bash(cp -r /home/ebry/.claude/skills/gofitur/* /root/.claude/skills/)",
-      "Bash(grep -E \"\\\\.\\(php|vue|js\\)$\")"
+      "Bash(grep -E \"\\\\.\\(php|vue|js\\)$\")",
+      "Bash(railway deployments *)"
     ]
   }
 }
