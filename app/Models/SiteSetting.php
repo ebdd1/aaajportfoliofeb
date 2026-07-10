@@ -69,36 +69,48 @@ class SiteSetting extends Model
 
     public static function getSingleton(): self
     {
-        return Cache::remember('site_setting_singleton', 3600, function () {
-            $setting = self::first();
+        try {
+            $cached = Cache::get('site_setting_singleton');
 
-            if ($setting) {
-                return $setting;
+            if ($cached instanceof self) {
+                return $cached;
             }
 
-            // Create default settings if none exist
-            return self::create([
-                'site_name' => 'Portfolio',
-                'site_description' => '',
-                'maintenance_mode' => false,
-                'pakasir_active' => false,
-                'hero_title_font' => 'font-serif',
-                'hero_title_color' => '#3D3929',
-                'hero_title_size' => 'text-6xl',
-                'hero_subtitle_font' => 'font-sans',
-                'hero_subtitle_color' => '#8C8273',
-                'hero_subtitle_size' => 'text-2xl',
-                'hero_stat_value_font' => 'font-mono',
-                'hero_stat_value_color' => '#3D3929',
-                'hero_stat_label_font' => 'font-sans',
-                'hero_stat_label_color' => '#8C8273',
-                'hero_stat_card_bg_color' => '#F5F1E8',
-                'hero_stat_card_opacity' => 100,
-                'hero_stat_card_border' => false,
-                'hero_stat_card_border_color' => '#E8E2D3',
-                'hero_stat_card_backdrop_blur' => false,
-            ]);
-        });
+            // Cache is corrupted or not instance of SiteSetting - clear it
+            Cache::forget('site_setting_singleton');
+        } catch (\Throwable $e) {
+            // Cache read failed - clear corrupted entry
+            Cache::forget('site_setting_singleton');
+        }
+
+        $setting = self::first();
+
+        if ($setting) {
+            Cache::put('site_setting_singleton', $setting, 3600);
+            return $setting;
+        }
+
+        return self::create([
+            'site_name' => 'Portfolio',
+            'site_description' => '',
+            'maintenance_mode' => false,
+            'pakasir_active' => false,
+            'hero_title_font' => 'font-serif',
+            'hero_title_color' => '#3D3929',
+            'hero_title_size' => 'text-6xl',
+            'hero_subtitle_font' => 'font-sans',
+            'hero_subtitle_color' => '#8C8273',
+            'hero_subtitle_size' => 'text-2xl',
+            'hero_stat_value_font' => 'font-mono',
+            'hero_stat_value_color' => '#3D3929',
+            'hero_stat_label_font' => 'font-sans',
+            'hero_stat_label_color' => '#8C8273',
+            'hero_stat_card_bg_color' => '#F5F1E8',
+            'hero_stat_card_opacity' => 100,
+            'hero_stat_card_border' => false,
+            'hero_stat_card_border_color' => '#E8E2D3',
+            'hero_stat_card_backdrop_blur' => false,
+        ]);
     }
 
     public static function clearCache(): void
