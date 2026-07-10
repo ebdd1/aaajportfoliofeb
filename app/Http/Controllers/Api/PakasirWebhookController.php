@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\WebhookLog;
 use App\Services\PakasirService;
 use App\Notifications\OrderStatusUpdatedNotification;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -106,6 +107,9 @@ class PakasirWebhookController extends Controller
             $order->markAsPaid($paymentMethod ?? $order->payment_method);
             Log::info('Order marked as paid', ['order_id' => $orderId]);
             $order->user->notify(new OrderStatusUpdatedNotification($order));
+
+            // Notify admin about new paid order
+            NewOrderNotification::notifyAdmin($order);
         } elseif ($status === 'expired') {
             $order->markAsExpired();
             Log::info('Order marked as expired', ['order_id' => $orderId]);

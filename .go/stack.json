@@ -1,0 +1,17 @@
+{
+  "stack": "laravel-inertia-vue",
+  "language": "php",
+  "language_version": "8.3",
+  "framework": "laravel",
+  "framework_version": "13.x",
+  "frontend": "vue3-inertia",
+  "database": "sqlite",
+  "cache": "database",
+  "queue": "database",
+  "test_command": "php artisan test",
+  "lint_command": "./vendor/bin/pint",
+  "type_check_command": null,
+  "build_command": "npm run build",
+  "dev_command": "npm run dev",
+  "migration_command": "php artisan migrate"
+}

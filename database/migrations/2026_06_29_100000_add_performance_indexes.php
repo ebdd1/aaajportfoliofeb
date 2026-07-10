@@ -39,7 +39,7 @@ return new class extends Migration
         // Transactions for finance queries
         Schema::table('transactions', function (Blueprint $table) {
             $table->index('type', 'idx_transactions_type');
-            $table->index('transaction_date', 'idx_transactions_date');
+            $table->index('date', 'idx_transactions_date');
         });
     }
 
