@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PakasirWebhookController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\Auth\RegisterApiController;
 use App\Http\Controllers\Api\Auth\LoginApiController;
 use App\Http\Controllers\Api\Auth\LogoutApiController;
@@ -12,6 +13,10 @@ use App\Http\Controllers\Api\Auth\MeApiController;
 | API Routes - No CSRF protection
 |--------------------------------------------------------------------------
 */
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
+Route::get('/health', [HealthController::class, 'check'])->name('api.health');
+Route::get('/health/pakasir', [HealthController::class, 'pakasir'])->name('api.health.pakasir');
 
 // ─── PAKASIR WEBHOOK ───────────────────────────────────────────────────────────
 Route::post('/pakasir/webhook', [PakasirWebhookController::class, 'handle'])

@@ -10,17 +10,19 @@ class PakasirService
     protected string $project;
     protected string $apiKey;
     protected string $baseUrl = 'https://app.pakasir.com/api';
+    protected int $timeout = 10;
 
     public function __construct()
     {
         $this->project = config('services.pakasir.project', env('PAKASIR_PROJECT', ''));
         $this->apiKey = config('services.pakasir.api_key', env('PAKASIR_API_KEY', ''));
+        $this->timeout = (int) config('services.pakasir.timeout', 10);
     }
 
     public function createTransaction(string $method, string $orderId, int $amount): array
     {
         try {
-            $response = Http::post("{$this->baseUrl}/transactioncreate/{$method}", [
+            $response = Http::timeout($this->timeout)->post("{$this->baseUrl}/transactioncreate/{$method}", [
                 'project' => $this->project,
                 'order_id' => $orderId,
                 'amount' => $amount,
@@ -49,7 +51,7 @@ class PakasirService
     public function getTransactionStatus(string $orderId, int $amount): ?array
     {
         try {
-            $response = Http::get("{$this->baseUrl}/transactiondetail", [
+            $response = Http::timeout($this->timeout)->get("{$this->baseUrl}/transactiondetail", [
                 'project' => $this->project,
                 'order_id' => $orderId,
                 'amount' => $amount,
@@ -70,7 +72,7 @@ class PakasirService
     public function cancelTransaction(string $orderId, int $amount): bool
     {
         try {
-            $response = Http::post("{$this->baseUrl}/transactioncancel", [
+            $response = Http::timeout($this->timeout)->post("{$this->baseUrl}/transactioncancel", [
                 'project' => $this->project,
                 'order_id' => $orderId,
                 'amount' => $amount,
@@ -92,7 +94,7 @@ class PakasirService
     public function simulatePayment(string $orderId, int $amount): array
     {
         try {
-            $response = Http::post("{$this->baseUrl}/paymentsimulation", [
+            $response = Http::timeout($this->timeout)->post("{$this->baseUrl}/paymentsimulation", [
                 'project' => $this->project,
                 'order_id' => $orderId,
                 'amount' => $amount,

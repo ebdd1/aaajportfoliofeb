@@ -71,6 +71,7 @@ class CheckoutController extends Controller
             'user_id' => auth()->id(),
             'total_amount' => $product->price,
             'status' => Order::STATUS_PENDING,
+            'payment_method' => $request->payment_method,
         ]);
 
         $order->items()->create([

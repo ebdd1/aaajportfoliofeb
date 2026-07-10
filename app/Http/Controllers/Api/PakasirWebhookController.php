@@ -81,7 +81,19 @@ class PakasirWebhookController extends Controller
 
         if ($status === 'completed') {
             $webhookAmount = $payload['amount'] ?? null;
+            $webhookMethod = $payload['payment_method'] ?? null;
 
+            // Payment method validation
+            if ($webhookMethod && $order->payment_method && $webhookMethod !== $order->payment_method) {
+                Log::warning('Pakasir webhook: Payment method mismatch', [
+                    'order_id' => $orderId,
+                    'expected_method' => $order->payment_method,
+                    'webhook_method' => $webhookMethod,
+                ]);
+                // Log but accept - Pakasir handles method internally
+            }
+
+            // Amount validation
             if ($webhookAmount !== $order->total_amount) {
                 Log::warning('Pakasir webhook: Amount mismatch', [
                     'order_id' => $orderId,
@@ -91,7 +103,7 @@ class PakasirWebhookController extends Controller
                 return response()->json(['error' => 'Amount mismatch'], 400);
             }
 
-            $order->markAsPaid($paymentMethod);
+            $order->markAsPaid($paymentMethod ?? $order->payment_method);
             Log::info('Order marked as paid', ['order_id' => $orderId]);
             $order->user->notify(new OrderStatusUpdatedNotification($order));
         } elseif ($status === 'expired') {
