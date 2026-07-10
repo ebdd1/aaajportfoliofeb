@@ -12,9 +12,13 @@
         <!-- Favicon -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-        <!-- Default Meta Tags -->
+        <!-- Default Meta Tags (can be overridden per page via Inertia) -->
         <title inertia>{{ config('app.name', 'Portfolio') }}</title>
-        <meta name="robots" content="index, follow">
+        <meta name="robots" content="index, follow" inertia>
+
+        <!-- Default OG Image -->
+        <meta property="og:type" content="website" inertia>
+        <meta property="og:site_name" content="{{ config('app.name', 'Portfolio') }}" inertia>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

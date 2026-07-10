@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import Navigation from '@/Components/Navigation.vue';
 import Footer from '@/Components/Footer.vue';
+import HeadManager from '@/Components/HeadManager.vue';
 
 defineProps({
     profile: {
@@ -16,10 +17,29 @@ defineProps({
         type: Array,
         default: () => [],
     },
+    // SEO props
+    seoTitle: {
+        type: String,
+        default: '',
+    },
+    seoDescription: {
+        type: String,
+        default: '',
+    },
+    seoImage: {
+        type: String,
+        default: '',
+    },
 });
 </script>
 
 <template>
+    <HeadManager
+        :title="seoTitle"
+        :description="seoDescription"
+        :og-image="seoImage"
+    />
+
     <div class="min-h-screen bg-gradient-to-br from-cream via-oat/30 to-cream flex flex-col">
         <Navigation :profile="profile" variant="default" />
 

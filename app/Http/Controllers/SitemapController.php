@@ -10,11 +10,21 @@ use App\Models\Product;
 use App\Models\Blog\Post;
 use App\Models\Blog\Category;
 use App\Models\Blog\Tag;
+use App\Models\SiteSetting;
 
 class SitemapController extends Controller
 {
     public function __invoke()
     {
+        $settings = SiteSetting::getSingleton();
+
+        // Check if sitemap inclusion is enabled
+        if (!$settings->seo_sitemap_include) {
+            return response()->xml([
+                'error' => 'Sitemap inclusion disabled',
+            ], 404);
+        }
+
         $sitemap = Sitemap::create()
             ->add(Url::create('/')
                 ->setLastModificationDate(now())
