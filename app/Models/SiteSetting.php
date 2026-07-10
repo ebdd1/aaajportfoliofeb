@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 class SiteSetting extends Model
 {
@@ -61,32 +60,13 @@ class SiteSetting extends Model
         'pakasir_webhook_secret',
     ];
 
-    protected static function booted(): void
-    {
-        static::updated(fn () => static::clearCache());
-        static::created(fn () => static::clearCache());
-    }
-
     public static function getSingleton(): self
     {
-        try {
-            $cached = Cache::get('site_setting_singleton');
-
-            if ($cached instanceof self) {
-                return $cached;
-            }
-
-            // Cache is corrupted or not instance of SiteSetting - clear it
-            Cache::forget('site_setting_singleton');
-        } catch (\Throwable $e) {
-            // Cache read failed - clear corrupted entry
-            Cache::forget('site_setting_singleton');
-        }
-
+        // Skip cache entirely - cache entire model causes __PHP_Incomplete_Class
+        // error with Laravel 13's serializable_classes: false security setting
         $setting = self::first();
 
         if ($setting) {
-            Cache::put('site_setting_singleton', $setting, 3600);
             return $setting;
         }
 
@@ -111,11 +91,6 @@ class SiteSetting extends Model
             'hero_stat_card_border_color' => '#E8E2D3',
             'hero_stat_card_backdrop_blur' => false,
         ]);
-    }
-
-    public static function clearCache(): void
-    {
-        Cache::forget('site_setting_singleton');
     }
 
     public function getFaviconUrlAttribute(): ?string

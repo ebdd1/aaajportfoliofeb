@@ -234,7 +234,16 @@
       "Bash(cp -r /home/ebry/.claude/skills/gowork/* /root/.claude/skills/)",
       "Bash(cp -r /home/ebry/.claude/skills/gofitur/* /root/.claude/skills/)",
       "Bash(grep -E \"\\\\.\\(php|vue|js\\)$\")",
-      "Bash(railway deployments *)"
+      "Bash(railway deployments *)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway whoami --json)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway status *)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway logs *)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway variable list --service laravel --json)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway --version)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway ssh -- --project=adb38315-6894-4adb-ae51-f4cb42b1dcd5 --environment=34f7d9ca-3365-43d6-9ea2-e56872a0ac21 --service=ee53aa29-d612-4b95-b486-7244c04f853d)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" RAILWAY_PROJECT_ID=adb38315-6894-4adb-ae51-f4cb42b1dcd5 RAILWAY_ENVIRONMENT_ID=34f7d9ca-3365-43d6-9ea2-e56872a0ac21 RAILWAY_SERVICE_ID=ee53aa29-d612-4b95-b486-7244c04f853d railway run *)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway redeploy *)",
+      "Bash(RAILWAY_CALLER=\"skill:use-railway@1.3.4\" railway deployment list --json)"
     ]
   }
 }
