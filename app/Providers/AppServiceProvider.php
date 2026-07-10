@@ -26,9 +26,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        // Register model observers for cache clearing
+        // Note: SiteSettingObserver removed - SiteSetting no longer uses caching
         Profile::observe(ProfileObserver::class);
-        SiteSetting::observe(SiteSettingObserver::class);
 
         // Force HTTPS untuk semua URL saat production (termasuk ngrok tunnel)
         if ($this->app->environment('production')) {
