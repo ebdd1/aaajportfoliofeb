@@ -181,13 +181,20 @@ const deleteHeroBackground = async () => {
 
                     <!-- Tab: Media -->
                     <div v-show="activeTab === 'media'" class="space-y-6">
-                        <h2 class="font-medium text-ink">Media Situs</h2>
-                        <div class="flex items-center gap-4 p-4 bg-oat rounded-xl">
+                        <div>
+                            <h2 class="font-medium text-ink mb-1">Media Situs</h2>
+                            <p class="text-xs text-taupe">Favicon dan gambar Open Graph untuk media sosial.</p>
+                        </div>
+
+                        <!-- Favicon -->
+                        <div class="flex items-center gap-4 p-4 bg-oat rounded-xl border border-oat-dark">
                             <div class="w-14 h-14 rounded-xl bg-paper border border-oat-dark flex items-center justify-center overflow-hidden shrink-0">
                                 <img v-if="settings?.favicon_url" :src="settings.favicon_url" alt="Favicon" class="w-10 h-10 object-contain" />
+                                <span v-else class="text-taupe text-xs">None</span>
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm font-medium text-ink mb-1">Favicon</p>
+                                <p class="text-[10px] text-taupe mb-2">Format: PNG, JPG, WebP. Maksimal 512KB.</p>
                                 <input type="file" accept="image/png,image/jpeg,image/webp"
                                     class="block w-full text-sm text-taupe file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-paper file:text-ink hover:file:bg-oat-dark transition-colors"
                                     @change="faviconForm.favicon = $event.target.files[0]" />
@@ -196,6 +203,28 @@ const deleteHeroBackground = async () => {
                                 class="px-4 py-2 bg-terracotta text-cream rounded-xl text-xs font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-40 shrink-0">
                                 Upload
                             </button>
+                        </div>
+
+                        <!-- OG Image -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 p-4 bg-oat rounded-xl border border-oat-dark">
+                                <div class="w-28 h-16 rounded-xl bg-paper border border-oat-dark flex items-center justify-center overflow-hidden shrink-0">
+                                    <img v-if="settings?.og_image_url" :src="settings.og_image_url" alt="OG Image" class="w-full h-full object-cover" />
+                                    <span v-else class="text-taupe text-[10px]">None</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-ink mb-1">Open Graph Image</p>
+                                    <p class="text-[10px] text-taupe mb-2">Gambar untuk preview saat link di-share ke media sosial.</p>
+                                    <p class="text-[10px] text-taupe mb-2">Rekomendasi: 1200×630px. Format: PNG, JPG, WebP. Maksimal 2MB.</p>
+                                    <input type="file" accept="image/png,image/jpeg,image/webp"
+                                        class="block w-full text-sm text-taupe file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-paper file:text-ink hover:file:bg-oat-dark transition-colors"
+                                        @change="ogForm.og_image = $event.target.files[0]" />
+                                </div>
+                                <button @click="submitOgImage" :disabled="ogForm.processing || !ogForm.og_image"
+                                    class="px-4 py-2 bg-terracotta text-cream rounded-xl text-xs font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-40 shrink-0">
+                                    Upload
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -489,15 +518,82 @@ const deleteHeroBackground = async () => {
                     </div>
 
                     <!-- Tab: Pembayaran -->
-                    <div v-show="activeTab === 'pembayaran'" class="space-y-5">
-                        <h2 class="font-medium text-ink">Pengaturan Pembayaran</h2>
-                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
-                            <strong>Info:</strong> Konfigurasi gateway pembayaran Pakasir.
+                    <div v-show="activeTab === 'pembayaran'" class="space-y-6">
+                        <div>
+                            <h2 class="font-medium text-ink mb-1">Pengaturan Pembayaran</h2>
+                            <p class="text-xs text-taupe">Konfigurasi gateway pembayaran Pakasir.</p>
                         </div>
+
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
+                            <strong>Info:</strong> Pakasir adalah payment gateway untuk Indonesia. Dapatkan credentials di dashboard Pakasir.
+                        </div>
+
+                        <!-- Pakasir Project ID -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">Project Configuration</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Project ID / Merchant ID</label>
+                                <input v-model="paymentForm.pakasir_project" type="text"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm"
+                                    placeholder="project_xxxxxx" />
+                                <p class="text-[10px] text-taupe mt-1">ID project dari dashboard Pakasir.</p>
+                            </div>
+                        </div>
+
+                        <!-- API Credentials -->
+                        <div class="p-5 bg-oat rounded-2xl space-y-4 border border-oat-dark">
+                            <h3 class="text-sm font-semibold text-ink border-b border-oat-dark pb-2">API Credentials</h3>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">API Key</label>
+                                <div class="relative">
+                                    <input v-model="paymentForm.pakasir_api_key" :type="showApiKey ? 'text' : 'password'"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm font-mono pr-10"
+                                        placeholder="pak_live_xxxxxx" />
+                                    <button type="button" @click="showApiKey = !showApiKey"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-taupe hover:text-ink">
+                                        <svg v-if="showApiKey" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-taupe mt-1">API key dari dashboard Pakasir.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ink mb-1">Webhook Secret</label>
+                                <div class="relative">
+                                    <input v-model="paymentForm.pakasir_webhook_secret" :type="showWebhookSecret ? 'text' : 'password'"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-oat-dark bg-paper focus:outline-none focus:border-terracotta transition-colors text-sm font-mono pr-10"
+                                        placeholder="whsec_xxxxxx" />
+                                    <button type="button" @click="showWebhookSecret = !showWebhookSecret"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-taupe hover:text-ink">
+                                        <svg v-if="showWebhookSecret" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-taupe mt-1">Secret untuk verify webhook signature.</p>
+                            </div>
+                        </div>
+
+                        <!-- Active Toggle -->
+                        <div class="flex items-center justify-between p-4 bg-oat rounded-xl border border-oat-dark">
+                            <div>
+                                <p class="text-sm font-medium text-ink">Aktifkan Pembayaran</p>
+                                <p class="text-[10px] text-taupe mt-0.5">Aktifkan agar customer bisa melakukan pembayaran.</p>
+                            </div>
+                            <button type="button" @click="paymentForm.pakasir_active = !paymentForm.pakasir_active"
+                                :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200',
+                                    paymentForm.pakasir_active ? 'bg-terracotta' : 'bg-oat-dark']">
+                                <span :class="['inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200',
+                                    paymentForm.pakasir_active ? 'translate-x-6' : 'translate-x-1']" />
+                            </button>
+                        </div>
+
                         <div class="flex justify-end pt-2">
                             <button @click="submitPayment" :disabled="paymentForm.processing"
                                 class="px-6 py-2.5 bg-terracotta text-cream rounded-xl font-medium text-sm hover:bg-terracotta/90 transition-colors disabled:opacity-50">
-                                Simpan
+                                {{ paymentForm.processing ? 'Menyimpan...' : 'Simpan' }}
                             </button>
                         </div>
                     </div>
