@@ -4,89 +4,87 @@ namespace App\Http\Controllers;
 
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
+use App\Models\Project;
+use App\Models\Certificate;
+use App\Models\Product;
+use App\Models\Blog\Post;
+use App\Models\Blog\Category;
+use App\Models\Blog\Tag;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Log;
 
 class SitemapController extends Controller
 {
     public function __invoke()
     {
-        $sitemap = Sitemap::create();
-
-        // Always add static pages first (doesn't need DB)
-        $this->addStaticPages($sitemap);
-
-        // Try to add dynamic content, but don't fail if DB is down
-        $this->addDynamicContent($sitemap);
-
-        return $sitemap->toResponse(request());
-    }
-
-    protected function addStaticPages(Sitemap $sitemap): void
-    {
-        $sitemap->add(Url::create('/')->setLastModificationDate(now())->setChangeFrequency('weekly')->setPriority(1.0));
-        $sitemap->add(Url::create('/products')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
-        $sitemap->add(Url::create('/blog')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
-        $sitemap->add(Url::create('/cv/download')->setLastModificationDate(now())->setChangeFrequency('monthly')->setPriority(0.8));
-    }
-
-    protected function addDynamicContent(Sitemap $sitemap): void
-    {
+        // Check if sitemap is enabled in settings (graceful fallback)
+        $sitemapEnabled = true;
         try {
-            // Only add dynamic content if we can connect to DB
-            $this->addBlogContent($sitemap);
-            $this->addProjectContent($sitemap);
-            $this->addProductContent($sitemap);
-            $this->addCertificateContent($sitemap);
+            $settings = SiteSetting::getSingleton();
+            $sitemapEnabled = $settings->seo_sitemap_include ?? true;
         } catch (\Throwable $e) {
-            Log::warning('Sitemap: DB unavailable, serving static pages only', [
+            // If settings can't load, default to enabled
+            Log::warning('Sitemap: Could not load site settings, using defaults', [
                 'error' => $e->getMessage(),
             ]);
         }
-    }
 
-    protected function addBlogContent(Sitemap $sitemap): void
-    {
-        $posts = \App\Models\Blog\Post::published()
-            ->whereNotNull('published_at')
-            ->get();
-
-        foreach ($posts as $post) {
-            $sitemap->add(Url::create("/blog/{$post->slug}")->setLastModificationDate($post->updated_at)->setChangeFrequency('weekly')->setPriority(0.8));
+        if (!$sitemapEnabled) {
+            return response()->xml(['error' => 'Sitemap disabled'], 404);
         }
 
-        foreach (\App\Models\Blog\Category::all() as $category) {
-            $sitemap->add(Url::create("/blog?category={$category->slug}")->setLastModificationDate($category->updated_at)->setChangeFrequency('weekly')->setPriority(0.6));
+        $sitemap = Sitemap::create();
+
+        try {
+            // Static pages - always add these
+            $sitemap->add(Url::create('/')->setLastModificationDate(now())->setChangeFrequency('weekly')->setPriority(1.0));
+            $sitemap->add(Url::create('/products')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
+            $sitemap->add(Url::create('/blog')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
+            $sitemap->add(Url::create('/cv/download')->setLastModificationDate(now())->setChangeFrequency('monthly')->setPriority(0.8));
+
+            // Blog posts
+            $posts = Post::published()->whereNotNull('published_at')->get();
+            foreach ($posts as $post) {
+                $sitemap->add(Url::create("/blog/{$post->slug}")->setLastModificationDate($post->updated_at)->setChangeFrequency('weekly')->setPriority(0.8));
+            }
+
+            // Blog categories
+            $categories = Category::all();
+            foreach ($categories as $category) {
+                $sitemap->add(Url::create("/blog?category={$category->slug}")->setLastModificationDate($category->updated_at)->setChangeFrequency('weekly')->setPriority(0.6));
+            }
+
+            // Blog tags
+            $tags = Tag::all();
+            foreach ($tags as $tag) {
+                $sitemap->add(Url::create("/blog?tag={$tag->slug}")->setLastModificationDate($tag->updated_at)->setChangeFrequency('weekly')->setPriority(0.5));
+            }
+
+            // Projects
+            $projects = Project::where('is_active', true)->get();
+            foreach ($projects as $project) {
+                $sitemap->add(Url::create("/#proyek")->setLastModificationDate($project->updated_at)->setChangeFrequency('monthly')->setPriority(0.6));
+            }
+
+            // Products
+            $products = Product::where('is_active', true)->get();
+            foreach ($products as $product) {
+                $sitemap->add(Url::create("/products/{$product->slug}")->setLastModificationDate($product->updated_at)->setChangeFrequency('weekly')->setPriority(0.7));
+            }
+
+            // Certificates
+            $certificates = Certificate::where('is_active', true)->get();
+            foreach ($certificates as $certificate) {
+                $sitemap->add(Url::create("/certificates/{$certificate->id}")->setLastModificationDate($certificate->updated_at)->setChangeFrequency('yearly')->setPriority(0.5));
+            }
+
+        } catch (\Throwable $e) {
+            // DB unavailable - still return static pages at minimum
+            Log::warning('Sitemap: Some DB queries failed', [
+                'error' => $e->getMessage(),
+            ]);
         }
 
-        foreach (\App\Models\Blog\Tag::all() as $tag) {
-            $sitemap->add(Url::create("/blog?tag={$tag->slug}")->setLastModificationDate($tag->updated_at)->setChangeFrequency('weekly')->setPriority(0.5));
-        }
-    }
-
-    protected function addProjectContent(Sitemap $sitemap): void
-    {
-        $projects = \App\Models\Project::where('is_active', true)->get();
-
-        foreach ($projects as $project) {
-            $sitemap->add(Url::create("/#proyek")->setLastModificationDate($project->updated_at)->setChangeFrequency('monthly')->setPriority(0.6));
-        }
-    }
-
-    protected function addProductContent(Sitemap $sitemap): void
-    {
-        $products = \App\Models\Product::where('is_active', true)->get();
-
-        foreach ($products as $product) {
-            $sitemap->add(Url::create("/products/{$product->slug}")->setLastModificationDate($product->updated_at)->setChangeFrequency('weekly')->setPriority(0.7));
-        }
-    }
-
-    protected function addCertificateContent(Sitemap $sitemap): void
-    {
-        $certificates = \App\Models\Certificate::where('is_active', true)->get();
-
-        foreach ($certificates as $certificate) {
-            $sitemap->add(Url::create("/certificates/{$certificate->id}")->setLastModificationDate($certificate->updated_at)->setChangeFrequency('yearly')->setPriority(0.5));
-        }
+        return $sitemap->toResponse(request());
     }
 }
