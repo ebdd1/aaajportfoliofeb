@@ -11,56 +11,70 @@ use App\Models\Blog\Post;
 use App\Models\Blog\Category;
 use App\Models\Blog\Tag;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Log;
 
 class SitemapController extends Controller
 {
     public function __invoke()
     {
-        $settings = SiteSetting::getSingleton();
+        try {
+            $settings = SiteSetting::getSingleton();
 
-        if (!$settings->seo_sitemap_include) {
-            return response()->xml([
-                'error' => 'Sitemap inclusion disabled',
-            ], 404);
+            if (!$settings->seo_sitemap_include) {
+                return response()->xml([
+                    'error' => 'Sitemap inclusion disabled',
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Sitemap: Failed to load settings, using defaults', [
+                'error' => $e->getMessage(),
+            ]);
         }
 
         $sitemap = Sitemap::create();
 
-        // Static pages
-        $sitemap->add(Url::create('/')->setLastModificationDate(now())->setChangeFrequency('weekly')->setPriority(1.0));
-        $sitemap->add(Url::create('/products')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
-        $sitemap->add(Url::create('/blog')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
-        $sitemap->add(Url::create('/cv/download')->setLastModificationDate(now())->setChangeFrequency('monthly')->setPriority(0.8));
+        try {
+            // Static pages
+            $sitemap->add(Url::create('/')->setLastModificationDate(now())->setChangeFrequency('weekly')->setPriority(1.0));
+            $sitemap->add(Url::create('/products')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
+            $sitemap->add(Url::create('/blog')->setLastModificationDate(now())->setChangeFrequency('daily')->setPriority(0.9));
+            $sitemap->add(Url::create('/cv/download')->setLastModificationDate(now())->setChangeFrequency('monthly')->setPriority(0.8));
 
-        // Blog posts
-        Post::published()->whereNotNull('published_at')->get()->each(function ($post) use ($sitemap) {
-            $sitemap->add(Url::create("/blog/{$post->slug}")->setLastModificationDate($post->updated_at)->setChangeFrequency('weekly')->setPriority(0.8));
-        });
+            // Blog posts
+            Post::published()->whereNotNull('published_at')->get()->each(function ($post) use ($sitemap) {
+                $sitemap->add(Url::create("/blog/{$post->slug}")->setLastModificationDate($post->updated_at)->setChangeFrequency('weekly')->setPriority(0.8));
+            });
 
-        // Blog categories
-        Category::all()->each(function ($category) use ($sitemap) {
-            $sitemap->add(Url::create("/blog?category={$category->slug}")->setLastModificationDate($category->updated_at)->setChangeFrequency('weekly')->setPriority(0.6));
-        });
+            // Blog categories
+            Category::all()->each(function ($category) use ($sitemap) {
+                $sitemap->add(Url::create("/blog?category={$category->slug}")->setLastModificationDate($category->updated_at)->setChangeFrequency('weekly')->setPriority(0.6));
+            });
 
-        // Blog tags
-        Tag::all()->each(function ($tag) use ($sitemap) {
-            $sitemap->add(Url::create("/blog?tag={$tag->slug}")->setLastModificationDate($tag->updated_at)->setChangeFrequency('weekly')->setPriority(0.5));
-        });
+            // Blog tags
+            Tag::all()->each(function ($tag) use ($sitemap) {
+                $sitemap->add(Url::create("/blog?tag={$tag->slug}")->setLastModificationDate($tag->updated_at)->setChangeFrequency('weekly')->setPriority(0.5));
+            });
 
-        // Projects
-        Project::where('is_active', true)->get()->each(function ($project) use ($sitemap) {
-            $sitemap->add(Url::create("/#proyek")->setLastModificationDate($project->updated_at)->setChangeFrequency('monthly')->setPriority(0.6));
-        });
+            // Projects
+            Project::where('is_active', true)->get()->each(function ($project) use ($sitemap) {
+                $sitemap->add(Url::create("/#proyek")->setLastModificationDate($project->updated_at)->setChangeFrequency('monthly')->setPriority(0.6));
+            });
 
-        // Products
-        Product::where('is_active', true)->get()->each(function ($product) use ($sitemap) {
-            $sitemap->add(Url::create("/products/{$product->slug}")->setLastModificationDate($product->updated_at)->setChangeFrequency('weekly')->setPriority(0.7));
-        });
+            // Products
+            Product::where('is_active', true)->get()->each(function ($product) use ($sitemap) {
+                $sitemap->add(Url::create("/products/{$product->slug}")->setLastModificationDate($product->updated_at)->setChangeFrequency('weekly')->setPriority(0.7));
+            });
 
-        // Certificates
-        Certificate::where('is_active', true)->get()->each(function ($certificate) use ($sitemap) {
-            $sitemap->add(Url::create("/certificates/{$certificate->id}")->setLastModificationDate($certificate->updated_at)->setChangeFrequency('yearly')->setPriority(0.5));
-        });
+            // Certificates
+            Certificate::where('is_active', true)->get()->each(function ($certificate) use ($sitemap) {
+                $sitemap->add(Url::create("/certificates/{$certificate->id}")->setLastModificationDate($certificate->updated_at)->setChangeFrequency('yearly')->setPriority(0.5));
+            });
+        } catch (\Exception $e) {
+            Log::error('Sitemap: Failed to generate sitemap content', [
+                'error' => $e->getMessage(),
+            ]);
+            // Return basic sitemap even if database queries fail
+        }
 
         return $sitemap->toResponse(request());
     }
