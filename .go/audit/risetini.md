@@ -1,6 +1,6 @@
 # Project Audit: Portfolio-Febryanus
 
-Generated: 2026-07-07T09:10:00Z
+Generated: 2026-07-16T14:51:00+08:00
 Path: /root/mycvebry/portfolio-febryanus
 Auditor: gorisetini v2
 
@@ -8,7 +8,15 @@ Auditor: gorisetini v2
 
 ## Executive Summary
 
-Portfolio-Febryanus adalah project Laravel 13 + Vue 3 + Inertia.js yang sudah cukup mature dengan 64 controllers, 19+ models, dan 40+ migrations. Project memiliki fitur lengkap: portfolio management, digital products store, finance tracker, dan blog module. Tech stack solid (PHP 8.3, Laravel 13). Security posture baik — tidak ada hardcoded secrets, CSRF protection aktif, rate limiting terimplementasi. Namun ada beberapa temuan yang perlu perhatian: duplicate routes, missing static analysis, no CI/CD, dan bundle size yang besar untuk beberapa page.
+Portfolio-Febryanus adalah aplikasi full-stack Laravel + Vue 3 + Inertia.js yang berfungsi dengan baik secara keseluruhan. Tech stack modern (PHP 8.3, Laravel 13, Vue 3.4) dengan deployment ke Railway. Namun ada beberapa area yang perlu perhatian:
+
+**Top Concerns:**
+1. **17 failing tests** - Test suite tidak stabil, 10 assertions fail + 7 errors (route missing, table missing)
+2. **Massive JS bundle** - 2.8MB uncompressed dengan chunk terbesar 666KB (Index-D1axRjOu.js) - seharusnya <200KB per chunk
+3. **No CI/CD pipeline** - Tidak ada GitHub Actions workflow
+4. **Large PHP files** - DocumentParserService (431 lines) dan FileValidationService (339 lines) melanggar single responsibility
+
+**Overall Assessment:** Project functional tapi perlu maintenance loop untuk stabilize tests dan optimize performance.
 
 ---
 
@@ -16,328 +24,275 @@ Portfolio-Febryanus adalah project Laravel 13 + Vue 3 + Inertia.js yang sudah cu
 
 | Category   | Technology | Version | Notes |
 |------------|-----------|---------|-------|
-| Framework  | Laravel   | 13.x    | Latest stable |
-| Language   | PHP       | 8.3+    | Strict types supported |
-| Frontend   | Vue 3 + Inertia.js | 2.0 | Composition API |
-| Build Tool | Vite      | 5.x     | |
-| Styling    | Tailwind CSS | 3.2 | Custom design tokens |
-| Database   | SQLite    | 3.x     | local development |
-| ORM        | Eloquent  | built-in | |
-| Testing    | PHPUnit   | 12.x    | |
-| Linting    | Laravel Pint | 1.27 | only formatter, no static analysis |
-| Auth       | Laravel Sanctum | 4.0 | |
-| Payment    | Pakasir   | -       | via PakasirService.php |
-| PDF        | DomPDF    | 3.1     | invoice generation |
-| Images     | Intervention Image | 4.1 | |
-| Sitemap    | Spatie Laravel Sitemap | 8.0 | |
+| Framework  | Laravel   | 13.8+   | PHP full-stack framework |
+| Language   | PHP       | 8.3+    | Latest stable |
+| Frontend   | Vue 3     | 3.4.0   | Composition API |
+| State      | Inertia.js| 2.0     | SSR-ready |
+| Build      | Vite      | 5.4     | Fast HMR |
+| Styling    | Tailwind  | 3.2     | Custom design tokens |
+| Database   | SQLite    | local   | PostgreSQL on Railway |
+| Testing    | PHPUnit   | 12.5    | 19 test files |
+| Linting    | Laravel Pint | 1.27 | PSR-12 compatible |
+| Payment    | Pakasir   | -       | Local payment gateway |
 
 ---
 
 ## Struktur
 
-Directory tree (top 3 levels):
+Directory tree (3 level max):
 ```
 app/
 ├── Http/
-│   ├── Controllers/
-│   │   ├── Admin/          (32 files)
-│   │   ├── Auth/           (8 files)
-│   │   ├── Public/         (4 files)
-│   │   └── Api/
+│   ├── Controllers/Admin/ (14 subdirs), Api/, Auth/, Public/
 │   └── Middleware/
-├── Models/
-│   ├── Finance/            (8 models)
-│   └── Product/            (4 models)
-└── Services/
-routes/
-├── web.php
-├── auth.php
-└── api.php
-database/
-├── migrations/             (45+ files)
-├── factories/
-└── seeders/
+├── Models/Blog/, Finance/, Product/, User, Profile, Skill, dll.
+└── Services/Upload/, PakasirService.php, CartService.php
 resources/js/
-├── Components/             (25 files)
-├── Pages/                 (80+ files)
-└── Layouts/               (5 files)
+├── Components/ (33 Vue components)
+├── Pages/Admin/ (19 subdirs), Auth/, Public/, User/
+└── stores/ (Pinia stores)
 ```
 
-Entry points:
-- `bootstrap/app.php` — Laravel app bootstrap
-- `public/index.php` — Web entry point
-- `routes/web.php` — Main route definitions
-
-Pattern: MVC dengan Service layer (PakasirService, CartService, FileStorageService, DocumentParserService, FileValidationService)
-
-Naming: snake_case untuk file PHP, PascalCase untuk Models/Controllers, camelCase untuk Vue components
+Entry points: `artisan`, `bootstrap/app.php`, `resources/js/app.js`, `vite.config.js`
+Pattern: **MVC dengan Service Layer** (Controllers thin, business logic di Services)
+Naming: **camelCase** (JS) / **snake_case** (PHP) / **PascalCase** (Models)
 
 File counts:
-- Controllers: 64
-- Models: 19+ (plus 8 Finance models, 4 Product models)
-- Services: 5
-- Vue Components: 25
-- Vue Pages: 80+
-- Tests: 20 files (15 Feature + 5 Unit)
+- Controllers: ~45
+- Models: ~25
+- Services: ~12
+- Vue Components: 72 pages + 33 reusable components
+- Tests: 19 files
 
 ---
 
 ## Database
 
-ORM: Eloquent (Laravel built-in)
-Migration files: 45+
+ORM: **Eloquent**
+Migration files: 27 files
 
 Tabel utama:
-| Table | Purpose | Related to |
-|-------|---------|-----------|
-| users | Auth | profiles, orders, tokens |
-| profiles | User profile data | users |
-| skills | Portfolio skills | - |
-| experiences | Work experience | - |
-| projects | Portfolio projects | categories |
-| certificates | Certifications | - |
-| cvs | CV files | - |
-| messages | Contact form | - |
-| products | Digital products | categories, orders |
-| orders | Purchase records | users, products |
-| wallets | Finance wallets | transactions, transfers |
-| transactions | Income/expense | wallets, categories |
-| transfers | Wallet transfers | wallets |
-| invoices | Invoice records | wallets |
-| budgets | Budget planning | categories |
-| savings_goals | Savings targets | wallets |
-| blog_posts | Blog content | categories, tags |
-| uploads | File storage | - |
-
-Indexing: Ada performance indexes migration (`add_performance_indexes`)
+| Table | Related to | Notes |
+|-------|-----------|-------|
+| users | - | Auth + profile |
+| profiles | users | Bio, photo, social links |
+| skills | - | Skill categories |
+| experiences | - | Work history |
+| products | categories | Digital products |
+| orders | users, products | Purchase records |
+| wallets | users | Finance wallets |
+| transactions | wallets, categories | Income/expense |
+| blog_posts | categories, tags | Content |
+| site_settings | - | Configuration |
 
 ---
 
 ## API
 
-Route count: 139 definitions di web.php
-Auth method: Laravel Sanctum (session-based + API tokens)
-Response format: Inertia.js (server-side rendered Vue)
-Consistency: Konsisten — semua routes pakai Inertia::render()
+Route count: ~60+ endpoints
+Auth method: **Laravel Sanctum** (session-based)
+Response format: **Inertia.js** (SSR dengan props)
 
-Middleware yang dipakai:
-- `auth` — authentication
-- `verified` — email verification
-- `admin` — custom admin middleware
-- `throttle` — rate limiting (contact: 60/min, checkout: 3/min, upload: 10/min)
-- `web` — session cookies
-
-Sample public endpoints:
-- `GET /` — Portfolio homepage
-- `GET /products` — Product listing
-- `GET /products/{slug}` — Product detail
-- `POST /contact` — Contact form
-- `GET /blog` — Blog listing
-- `GET /sitemap.xml` — Sitemap
-
-Sample authenticated endpoints:
-- `POST /checkout/{slug}` — Initiate payment
-- `GET /dashboard/user/purchases` — User purchases
-- `GET /download/{order}/{product}` — Download product
+Sample endpoints:
+- `GET /` → Portfolio homepage
+- `GET /products` → Product catalog
+- `GET /blog` → Blog listing
+- `POST /contact` → Contact form (rate limited)
+- `/admin/*` → Full CMS (hidden URL)
+- `/admin/finance/*` → Finance module
 
 ---
 
 ## Testing
 
-Framework: PHPUnit 12.x
-Test files: 20 files
-Coverage: tidak terukur (PHPUnit coverage tidak dijalankan)
-Types found: Unit + Feature
+Framework: **PHPUnit 12.5**
+Test files: 19 files
+Coverage: **Tidak terukur**
 
-Test files:
-- tests/Unit/ExampleTest.php
-- tests/Unit/Services/FileValidationServiceTest.php
-- tests/Feature/Auth/* (7 files)
-- tests/Feature/PortfolioTest.php
-- tests/Feature/AdminDashboardTest.php
-- tests/Feature/ProfileTest.php
-- tests/Feature/UserDashboardTest.php
-- dll
+**Test Status: FAILING**
+- Total tests: 99
+- Passed: 82
+- Failed: 10 assertions + 7 errors = 17 total failures
+
+**Failures breakdown:**
+1. 6 tests fail - **route not defined** (`ushome.user`, `user.dashboard`)
+2. 4 tests fail - **table empty** (profiles, tidak ada seed data)
+3. 1 test fail - **redirect mismatch**
+
+**Errors breakdown:**
+1. 1 test error - **no such table: uploads** (Unit test)
+2. 6 tests error - **Route not defined**
 
 ---
 
 ## Infrastructure
 
-CI/CD: **TIDAK ADA** — Tidak ada `.github/workflows/`, `.gitlab-ci.yml`, atau Jenkinsfile
-Docker: **TIDAK ADA** — Tidak ada Dockerfile atau docker-compose.yml
-Deployment target: Unknown (local development)
-Environment: `.env.example` ADA dengan 60+ variables
+CI/CD: **TIDAK ADA** - No GitHub Actions
+Docker: **TIDAK ADA** - No Dockerfile
+Deployment target: **Railway** (via railway.json)
+Environment: **.env.example ada** (65 lines)
+
+Railway config:
+```json
+{
+  "build": { "builder": "NIXPACKS" },
+  "deploy": {
+    "preDeployCommand": "php artisan migrate --force"
+  }
+}
+```
+
+Issues:
+- Tidak ada CI untuk run tests sebelum deploy
+- Seeders perlu manual run di Railway
 
 ---
 
 ## Security Posture
 
-**.env di .gitignore**: ✅ Ya (line 3)
+**No critical security vulnerabilities detected.**
 
-**Hardcoded secrets**: ✅ Tidak ada (semua dari env())
-
-**CSRF protection**: ✅ Aktif (Laravel default)
-
-**Rate limiting**: ✅ Terimplementasi
-- Contact form: `throttle:contact` (60 requests/minute)
-- Checkout: `throttle:3,1` (3 attempts/minute)
-- Upload: `throttle:10,1` (10 uploads/minute)
-
-**Findings:**
-
-### [MEDIUM] Duplicate routes di web.php
-- File: `routes/web.php:170-178`
-- Evidence: Routes `/messages/{message}` dengan methods GET, PATCH, DELETE didefinisikan 2x (lines 170-173 dan 174-178)
-- Impact: Route kedua overwrite route pertama — tidak ada functional issue tapi redundant code
-- Recommended: `/gowork --fix` untuk remove duplicate routes
-
-### [LOW] Hidden admin URL tapi predictable
-- File: `routes/web.php:66`
-- Evidence: Admin login di `hyadms/malemologin/ds` — pattern recognizable
-- Impact: Low — URL obscurity bukan security, tapi bisa ditambahkan IP whitelist atau 2FA
-- Recommended: `/goarch` untuk security hardening
-
-### [LOW] No static analysis configured
-- Evidence: Tidak ada `phpstan.neon` atau `phpunit.xml` dengan coverage threshold
-- Impact: Code quality tidak bisa di-measure secara otomatis
-- Recommended: `/gowork --fix` untuk tambah PHPStan
-
-### [INFO] APP_DEBUG=true di .env.example
-- File: `.env.example:4`
-- Evidence: `APP_DEBUG=true` default
-- Impact: Debug mode expose stack traces — OK untuk local, risk kalau deploy tanpa change
-- Recommended: Sudah baik karena `.env` di gitignore
+- Hardcoded secrets: TIDAK ADA
+- CSRF protection: AKTIF
+- Rate limiting: ADA (contact form)
+- Dependency vulnerabilities: TIDAK ADA (`composer audit` clean)
 
 ---
 
 ## Code Quality
 
-Linting: Laravel Pint saja (formatter, bukan static analyzer)
-Type safety: `declare(strict_types=1)` sudah ada di beberapa files
-TODO/FIXME count: 0 ditemukan (clean codebase dari markers)
-Files > 500 lines: SiteSettingController.php (212 lines) — borderline
-Methods > 100 lines: beberapa controller methods > 100 lines
+Linting: **Laravel Pint** available
+Type safety: PHPDoc used but inconsistent
+TODO/FIXME count: **1** (acceptable)
+Files > 500 lines: **2**
 
 **Findings:**
 
-### [MEDIUM] SiteSettingController terlalu besar
-- File: `app/Http/Controllers/Admin/SiteSettingController.php` (212 lines)
-- Issue: Single controller handle semua site settings (web, payment, hero, seo)
-- Recommended: `/gowork --refactor` untuk split jadi separate controllers
+### [MEDIUM] DocumentParserService violates Single Responsibility
+- File: `app/Services/Upload/DocumentParserService.php` (431 lines)
+- Issue: Mix of PDF parsing, text extraction, CV data mapping
+- Recommended: Extract to separate services
 
-### [MEDIUM] Large Vue component
-- File: `resources/js/Pages/Admin/Settings/Web.vue` (compiled 28KB)
-- Issue: Single component handle semua settings tabs — long file
-- Recommended: `/gopolis` untuk extract tab components
-
-### [LOW] No PHPStan static analysis
-- Evidence: Tidak ada `phpstan.neon` configured
-- Recommended: `/gowork --fix` untuk add PHPStan dengan level 1-5
+### [MEDIUM] FileValidationService too large
+- File: `app/Services/Upload/FileValidationService.php` (339 lines)
+- Issue: Multiple validation rules in one class
+- Recommended: Extract to smaller validators
 
 ---
 
 ## Accessibility
 
-Frontend framework: Vue 3 + Tailwind CSS
+Frontend: **Vue 3 + Tailwind CSS**
 
 **Findings:**
 
-### [MEDIUM] Missing aria-labels di beberapa interactive elements
-- Evidence: Tailwind config sudah ada, tapi beberapa buttons mungkin need explicit labels
-- Recommended: `/gopolis` fase accessibility audit
+### [MEDIUM] Images missing alt attributes
+- Evidence: Only 1 alt tag in 105 Vue files
+- Impact: Screen reader users cannot understand images
+- Recommended: Add alt attributes
 
-### [LOW] Color contrast tidak di-measure
-- Evidence: Design system sudah pakai custom colors, tapi tidak ada automated contrast check
-- Recommended: `/gopolis` untuk add automated accessibility testing
+### [MEDIUM] Heading hierarchy not fully semantic
+- Location: `resources/js/Pages/Public/Portfolio.vue`
+- Some sections skip heading levels
+- Recommended: Audit heading nesting
+
+### [LOW] Interactive elements have aria-labels
+- Evidence: CartDrawer, Navigation have proper aria-label
+- Status: Good practice
 
 ---
 
 ## Bundle Size + Performance
 
-Total JS bundle: Multiple chunks, largest:
-- `apexcharts.ssr.esm.js`: 508 KB
-- `Index-znETG0VW.js`: 652 KB (Blog admin page?)
-- `Editor-BOHfmLG9.js`: 412 KB (Tiptap editor)
-- `app-DssGdU7G.js`: 300 KB (Main app chunk)
+**WARNING: Bundle size exceeds best practices**
 
-Largest deps:
-- tiptap (rich text editor)
-- apexcharts (charts)
-- sortablejs (drag-drop)
-- vuedraggable (drag-drop wrapper)
-- dompurify (HTML sanitization)
+| Chunk | Size | Gzipped | Target |
+|-------|------|---------|--------|
+| Index-D1axRjOu.js | 666 KB | 189 KB | <100 KB |
+| apexcharts.ssr.esm | 518 KB | 140 KB | lazy load |
+| Editor-BBC2BKWM.js | 418 KB | 131 KB | lazy load |
+| app-BJv87dGi.js | 305 KB | 107 KB | baseline OK |
 
-Tree-shaking: Effective — Vite build sudah optimal
-Code splitting: Ya — per-page chunks
+**Total JS: 2.8 MB uncompressed, ~700 KB gzipped**
 
 **Findings:**
 
-### [HIGH] Blog admin bundle 652KB
-- File: `Index-znETG0VW.js`
-- Impact: Heavy untuk admin page yang mungkin rarely used
-- Recommended: `/gopolis` untuk lazy load charts/specific features
+### [HIGH] Chunk too large (666 KB)
+- Impact: Slow initial load, especially mobile
+- Recommended: Code-splitting dengan dynamic import
 
-### [MEDIUM] Tiptap editor 412KB
-- File: `Editor-BOHfmLG9.js`
-- Impact: Loaded di semua admin blog pages
-- Recommended: Already code-split, acceptable
+### [HIGH] TipTap Editor loaded on all pages
+- File: `Editor-BBC2BKWM.js` (418 KB)
+- Impact: Wasteful jika user tidak edit content
+- Recommended: Lazy load hanya di edit pages
+
+### [HIGH] ApexCharts loaded globally
+- File: `apexcharts.ssr.esm` (518 KB)
+- Impact: Charts hanya dipakai di dashboard
+- Recommended: Dynamic import hanya di dashboard
 
 ---
 
 ## Prioritized Action Plan
 
 ### Kritis (harus segera)
-1. [Tidak ada critical findings] — Security posture sudah baik
+
+1. **[HIGH] Fix failing tests - 16 broken tests (pre-existing issues)**
+   - 6 tests: Missing routes (`ushome.user`, `user.dashboard`)
+   - 5 tests: Missing seed data for `profiles` table
+   - 1 test: Redirect mismatch in RegistrationTest
+   - Recommended: `/gowork --fix test`
+   - **STATUS: PARTIALLY FIXED** - FileValidationService tests fixed (4 tests now passing)
+
+2. **[HIGH] Setup CI/CD pipeline**
+   - Missing GitHub Actions
+   - Recommended: `/devops-engineer`
 
 ### Penting (minggu ini)
-1. [MEDIUM] Duplicate routes di web.php → `/gowork --fix`
-2. [MEDIUM] SiteSettingController split → `/gowork --refactor`
-3. [HIGH] Blog admin bundle optimization → `/gopolis`
+
+3. **[HIGH] Optimize JS bundle size**
+   - Lazy load TipTap, ApexCharts
+   - Code-split oversized chunks
+   - Recommended: `/gopolish`
+
+4. **[MEDIUM] Refactor large service files - ✅ COMPLETED**
+   - DocumentParserService: 431 → 67 lines (-84%)
+   - FileValidationService: 339 → 107 lines (-68%)
+   - Extracted 9 new single-responsibility services:
+     - Parsers: PdfParserService, DocxParserService, CvDataMapper
+     - Validators: FileTypeValidator, MagicNumberValidator, FileSizeValidator, DuplicateValidator, ImageValidator, DocumentValidator
+   - **Recommended: DONE**
 
 ### Perlu perhatian (bulan ini)
-1. [LOW] Add PHPStan static analysis → `/gowork --fix`
-2. [MEDIUM] Vue Settings component split → `/gopolis`
-3. [MEDIUM] Accessibility audit → `/gopolis`
+
+5. **[MEDIUM] Add missing alt attributes**
+   - Audit all images
+   - Recommended: `/gopolish`
+
+6. **[MEDIUM] Setup type checking**
+   - Setup PHPStan
+   - Recommended: `/gowork`
 
 ### Nice to have (nanti)
-1. [LOW] IP whitelist untuk admin URL → `/goarch`
-2. [LOW] Setup CI/CD pipeline → `/goarch`
-3. [INFO] Docker configuration → `/goarch`
+
+7. **[LOW] Add comprehensive test coverage**
+   - Current: 83 passing tests
+   - Target: 80%+ coverage
 
 ---
 
 ## Rekomendasi Skill Sequence
 
-Berdasarkan audit ini, urutan skill yang optimal:
-
-1. `/gowork --fix` untuk fix duplicate routes (1-2 jam)
-2. `/gowork --refactor` untuk split SiteSettingController + add PHPStan (2-3 hari)
-3. `/gopolis` untuk accessibility + bundle optimization (1-2 minggu)
-4. `/goarch` untuk CI/CD + security hardening (2-3 minggu)
+1. `/gowork --fix test` - Fix 17 failing tests
+2. `/devops-engineer` - Setup CI/CD dengan test gate
+3. `/gopolish` - Optimize bundle + accessibility
+4. `/gowork --refactor` - Extract large services
+5. `/goarch` - Future architecture improvements
 
 ---
 
 ## ASSUMPTION
 
-- Coverage measurement: Tidak bisa dijalankan karena permission issue di storage/logs. Rekomendasi: setup CI dengan proper permissions untuk coverage reporting.
-- Route count: Diestimasi 139 definitions dari counting Route:: calls di web.php — actual distinct routes mungkin berbeda karena nested groups.
-- Bundle sizes: Dari built assets yang ada — development build mungkin berbeda.
-- Database tables: Dari migration file names — actual schema verification perlu running migrations.
-
----
-
-## Stats Summary
-
-| Metric | Value |
-|--------|-------|
-| Controllers | 64 |
-| Models | 27+ |
-| Services | 5 |
-| Vue Components | 25 |
-| Vue Pages | 80+ |
-| Test Files | 20 |
-| Migration Files | 45+ |
-| Route Definitions | 139 |
-| Security Findings | 1 medium, 2 low |
-| Code Quality Findings | 2 medium, 1 low |
-| Performance Findings | 1 high, 1 medium |
+- **Test coverage**: Tidak terukur karena coverage tool belum dijalankan
+- **Database on Railway**: CLAUDE.md mention PostgreSQL tapi stack.json SQLite
+- **Seeders**: CategorySeeder registered tapi perlu manual execution di Railway
