@@ -281,8 +281,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/uploads/{upload}/signed-url', [UploadController::class, 'signedUrl'])->name('api.uploads.signed-url');
 });
 
-// Cart routes (all users)
-Route::middleware(['web'])->group(function () {
+// Cart routes (all users) - rate limited
+Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::get('/api/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/api/cart', [CartController::class, 'store'])->name('cart.store');
     Route::patch('/api/cart/{product}', [CartController::class, 'update'])->name('cart.update');
@@ -290,15 +290,13 @@ Route::middleware(['web'])->group(function () {
     Route::delete('/api/cart', [CartController::class, 'clear'])->name('cart.clear');
 });
 
-// API Routes
-Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+// API Routes - rate limited
+Route::middleware(['auth', 'verified', 'throttle:100,1'])->prefix('api')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index'])->name('api.notifications.index');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead'])->name('api.notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead'])->name('api.notifications.read-all');
 });
-Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
     Route::get('/orders/{orderId}', [\App\Http\Controllers\Api\OrderController::class, 'show'])->name('api.orders.show');
-});
-Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{orderId}', [\App\Http\Controllers\User\OrderController::class, 'show'])->name('orders.show');
 });

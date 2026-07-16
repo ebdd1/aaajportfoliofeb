@@ -8,6 +8,7 @@
     "numReplicas": 1,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
-    "preDeployCommand": "php artisan migrate --force"
+    "preDeployCommand": "php artisan migrate --force",
+    "startCommand": "php -d expose_php=Off artisan serve --port=$PORT"
   }
 }

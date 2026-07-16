@@ -13,4 +13,4 @@ Disallow: /payment
 Disallow: /api/cart
 
 # Sitemap
-Sitemap: https://greyhound-quicken-schedule.ngrok-free.dev/sitemap.xml
+Sitemap: https://febryanmyidh.up.railway.app/sitemap.xml
